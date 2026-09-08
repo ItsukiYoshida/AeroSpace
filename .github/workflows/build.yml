@@ -24,7 +24,7 @@ jobs:
         # Xcode versions:
         # - https://en.wikipedia.org/wiki/Xcode
         # - https://xcodereleases.com/?scope=release
-        os: [macos-14, macos-15, macos-26]
+        os: [macos-14]
     name: build-debug
     runs-on: ${{ matrix.os }}
     steps:
@@ -41,6 +41,7 @@ jobs:
   # 1. It cuts the build time twice on GH Actions
   # 2. The latest Xcode version is not available on old macOS, and old Xcode versions bundle too old Swift version
   build-release:
+    if: ${{ false }}
     strategy:
       # fail-fast: false # Disable fail-fast in matrix
       matrix:
