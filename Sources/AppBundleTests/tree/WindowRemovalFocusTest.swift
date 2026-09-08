@@ -8,6 +8,8 @@ final class WindowRemovalFocusTest: XCTestCase {
     }
 
     func testClosingBackgroundDialogPreservesFocusedWindow() {
+        let previousApp = appForTests
+        defer { appForTests = previousApp }
         let workspace = Workspace.get(byName: "1")
         let browserApp = TestApp(pid: 1)
         let terminalApp = TestApp(pid: 2)

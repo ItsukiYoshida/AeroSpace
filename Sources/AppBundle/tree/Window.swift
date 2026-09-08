@@ -80,14 +80,13 @@ extension Window {
             switch parent.cases {
                 case .tilingContainer, .floatingWindowsContainer, .macosHiddenAppsWindowsContainer, .macosFullscreenWindowsContainer:
                     // Closing a background window must not replace a surviving focus with the tree's MRU.
-                    let deadWindowFocus: LiveFocus
-                    if let focusedWindow = focusBeforeRemoval.windowOrNil,
-                       focusedWindow != self,
-                       focusedWindow.visualWorkspace == deadWindowWorkspace
+                    let deadWindowFocus: LiveFocus = if let focusedWindow = focusBeforeRemoval.windowOrNil,
+                                                        focusedWindow != self,
+                                                        focusedWindow.visualWorkspace == deadWindowWorkspace
                     {
-                        deadWindowFocus = LiveFocus(windowOrNil: focusedWindow, workspace: deadWindowWorkspace)
+                        LiveFocus(windowOrNil: focusedWindow, workspace: deadWindowWorkspace)
                     } else {
-                        deadWindowFocus = deadWindowWorkspace.toLiveFocus()
+                        deadWindowWorkspace.toLiveFocus()
                     }
                     _ = setFocus(to: deadWindowFocus)
                     // Guard against "Apple Reminders popup" bug: https://github.com/nikitabobko/AeroSpace/issues/201
