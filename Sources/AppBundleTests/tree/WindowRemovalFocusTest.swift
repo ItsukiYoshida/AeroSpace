@@ -3,7 +3,7 @@ import XCTest
 
 @MainActor
 final class WindowRemovalFocusTest: XCTestCase {
-    override func setUp() {
+    override func setUp() async throws {
         setUpWorkspacesForTests()
     }
 
