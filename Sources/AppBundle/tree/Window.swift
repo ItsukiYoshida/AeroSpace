@@ -68,4 +68,30 @@ extension Window {
     }
 
     func asMacWindow() -> MacWindow { self as! MacWindow }
+
+    @MainActor
+    func unbindAndRestoreFocus(_ focusBeforeRemoval: LiveFocus) {
+        let parent = unbindFromParent().parent
+        let deadWindowWorkspace = parent.nodeWorkspace
+        let focus = focus
+        if let deadWindowWorkspace, deadWindowWorkspace == focus.workspace ||
+            deadWindowWorkspace == prevFocusedWorkspace && prevFocusedWorkspaceDate.distance(to: .now) < 1
+        {
+            switch parent.cases {
+                case .tilingContainer, .floatingWindowsContainer, .macosHiddenAppsWindowsContainer, .macosFullscreenWindowsContainer:
+                    let deadWindowFocus = deadWindowWorkspace.toLiveFocus()
+                    _ = setFocus(to: deadWindowFocus)
+                    // Guard against "Apple Reminders popup" bug: https://github.com/nikitabobko/AeroSpace/issues/201
+                    if focus.windowOrNil?.app.pid != app.pid {
+                        // Force focus to fix macOS annoyance with focused apps without windows.
+                        //   https://github.com/nikitabobko/AeroSpace/issues/65
+                        deadWindowFocus.windowOrNil?.nativeFocus()
+                    }
+                case .macosPopupWindowsContainer,
+                     .workspace,
+                     .macosMinimizedWindowsContainer:
+                    break
+            }
+        }
+    }
 }

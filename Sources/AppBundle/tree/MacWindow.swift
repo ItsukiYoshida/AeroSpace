@@ -77,32 +77,12 @@ final class MacWindow: Window {
     //                        If you are unsure, it's better to pass `false`
     @MainActor
     func garbageCollect(skipClosedWindowsCache: Bool) {
+        let focusBeforeRemoval = focus
         if MacWindow.allWindowsMap.removeValue(forKey: windowId) == nil {
             return
         }
         if !skipClosedWindowsCache { cacheClosedWindowIfNeeded() }
-        let parent = unbindFromParent().parent
-        let deadWindowWorkspace = parent.nodeWorkspace
-        let focus = focus
-        if let deadWindowWorkspace, deadWindowWorkspace == focus.workspace ||
-            deadWindowWorkspace == prevFocusedWorkspace && prevFocusedWorkspaceDate.distance(to: .now) < 1
-        {
-            switch parent.cases {
-                case .tilingContainer, .floatingWindowsContainer, .macosHiddenAppsWindowsContainer, .macosFullscreenWindowsContainer:
-                    let deadWindowFocus = deadWindowWorkspace.toLiveFocus()
-                    _ = setFocus(to: deadWindowFocus)
-                    // Guard against "Apple Reminders popup" bug: https://github.com/nikitabobko/AeroSpace/issues/201
-                    if focus.windowOrNil?.app.pid != app.pid {
-                        // Force focus to fix macOS annoyance with focused apps without windows.
-                        //   https://github.com/nikitabobko/AeroSpace/issues/65
-                        deadWindowFocus.windowOrNil?.nativeFocus()
-                    }
-                case .macosPopupWindowsContainer, // Don't switch back on popup destruction
-                     .workspace, // Workspace is invalid parent for windows
-                     .macosMinimizedWindowsContainer: // Don't switch back on minimized windows destruction
-                    break
-            }
-        }
+        unbindAndRestoreFocus(focusBeforeRemoval)
     }
 
     override func getTitle(_ cm: CancellationMode) async throws -> String { try await macApp.getAxTitle(windowId, cm) ?? "" }
