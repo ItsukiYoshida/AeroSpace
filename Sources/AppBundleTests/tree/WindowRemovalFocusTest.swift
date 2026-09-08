@@ -9,17 +9,19 @@ final class WindowRemovalFocusTest: XCTestCase {
 
     func testClosingBackgroundDialogPreservesFocusedWindow() {
         let workspace = Workspace.get(byName: "1")
-        let browser = TestWindow.new(id: 1, parent: workspace.rootTilingContainer)
+        let browserApp = TestApp(pid: 1)
+        let terminalApp = TestApp(pid: 2)
+        let dialogApp = TestApp(pid: 3)
+        let browser = TestWindow.new(id: 1, parent: workspace.rootTilingContainer, app: browserApp)
         XCTAssertTrue(browser.focusWindow())
-        let terminal = TestWindow.new(id: 2, parent: workspace.rootTilingContainer)
-        let dialog = TestWindow.new(id: 3, parent: workspace.floatingWindowsContainer)
+        let terminal = TestWindow.new(id: 2, parent: workspace.rootTilingContainer, app: terminalApp)
+        let dialog = TestWindow.new(id: 3, parent: workspace.floatingWindowsContainer, app: dialogApp)
         terminal.markAsMostRecentChild()
-        browser.nativeFocus()
-
         dialog.unbindAndRestoreFocus(focus)
 
         XCTAssertEqual(focus.windowOrNil, browser)
-        XCTAssertEqual(TestApp.shared.focusedWindow, browser)
+        XCTAssertEqual(browserApp.focusedWindow, browser)
+        XCTAssertNil(terminalApp.focusedWindow)
     }
 
     func testClosingFocusedWindowSelectsRemainingWindow() {
