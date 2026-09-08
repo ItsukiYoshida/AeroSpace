@@ -64,9 +64,10 @@ jobs:
         if: ${{ always() }}
         run: 'if test -f ./.release/xcodebuild.log; then cat ./.release/xcodebuild.log; fi'
       - uses: actions/upload-artifact@v4
-        if: ${{ github.repository == 'ItsukiYoshida/AeroSpace' && matrix.os == 'macos-26' }}
+        if: ${{ github.repository == 'ItsukiYoshida/AeroSpace' }}
         with:
-          name: aerospace-focus-fix-${{ github.sha }}
+          name: aerospace-focus-fix-${{ matrix.os }}-${{ github.sha }}
           path: .release/AeroSpace-v*.zip
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14
